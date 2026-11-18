@@ -1,0 +1,249 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Тренажёр каны</title>
+<style>
+:root{--bg:#f6f3ee;--card:#fffdf9;--ink:#2a2723;--muted:#7a736a;--line:#e3ddd3;--accent:#b5452f;--accent-ink:#fff;--accent-soft:#f6e6d6;--ok:#3d7a4f;--ok-soft:#dcefe1;--bad:#b23a3a;--bad-soft:#f6dcdc}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#1c1a18;--card:#262320;--ink:#ece6dc;--muted:#a39a8e;--line:#3a3530;--accent:#e07a5f;--accent-ink:#1c1a18;--accent-soft:#3d3024;--ok:#7cc48f;--ok-soft:#21352a;--bad:#e08080;--bad-soft:#3d2424;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#1c1a18;--card:#262320;--ink:#ece6dc;--muted:#a39a8e;--line:#3a3530;--accent:#e07a5f;--accent-ink:#1c1a18;--accent-soft:#3d3024;--ok:#7cc48f;--ok-soft:#21352a;--bad:#e08080;--bad-soft:#3d2424;color-scheme:dark}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+.jp{font-family:"UD Digi Kyokasho N-R","UD デジタル 教科書体 N-R","Yu Mincho","YuMincho","Hiragino Mincho ProN","Noto Serif JP","MS Mincho",serif;font-weight:400}
+.wrap{max-width:640px;margin:0 auto;padding-block:16px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+h1{font-size:20px;margin:4px 0 12px}
+nav{display:flex;gap:6px;flex-wrap:wrap}
+nav button{flex:1 1 auto;padding:8px 10px;border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:999px;cursor:pointer;font:inherit;font-size:14px}
+nav button.on{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+details{margin-top:10px;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:8px 12px}
+summary{cursor:pointer;color:var(--muted);font-size:14px}
+.set{display:flex;flex-wrap:wrap;gap:8px 14px;margin:10px 0 4px;font-size:15px}
+.set label{display:flex;align-items:center;gap:4px;cursor:pointer}
+.set b{font-weight:600;width:100%;font-size:13px;color:var(--muted)}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px;margin-top:12px;min-height:380px}
+.prompt{text-align:center;min-height:170px;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:8px 0}
+.big{font-size:128px;line-height:1.1}
+.word{font-size:64px;line-height:1.2}
+.ru{font-size:34px;font-weight:600}
+.ro{color:var(--muted)}
+.mean{font-size:18px;margin-top:4px}
+.hint{text-align:center;color:var(--muted);min-height:90px;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.opts{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.opt{position:relative;padding:14px 8px;font-size:24px;border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:12px;cursor:pointer;font-family:inherit}
+.opt.jp{font-size:44px;line-height:1.2}
+.opt small{display:block;font-size:13px;color:var(--muted);font-family:system-ui,sans-serif}
+.opt .k{position:absolute;top:6px;left:9px;font-size:11px;color:var(--muted);font-family:system-ui,sans-serif}
+.opt:disabled{cursor:default}
+.right{background:var(--ok-soft)!important;border-color:var(--ok)!important}
+.wrong{background:var(--bad-soft)!important;border-color:var(--bad)!important}
+.fb{margin-top:12px;text-align:center;min-height:44px}
+.fb .jp{font-size:28px}
+.act{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
+.btn{padding:12px 18px;border-radius:12px;border:1px solid var(--line);background:var(--bg);color:var(--ink);font:inherit;cursor:pointer;min-width:140px}
+.btn.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.btn.good{background:var(--ok-soft);border-color:var(--ok)}
+.btn.bad{background:var(--bad-soft);border-color:var(--bad)}
+.btn .k{font-size:11px;opacity:.7;margin-left:6px}
+.status{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-top:12px;font-size:14px;color:var(--muted)}
+.chip{display:inline-block;padding:0 6px;margin:0 2px;border-radius:6px;background:var(--bad-soft);color:var(--ink);font-size:20px}
+h3{margin:8px 0;font-size:15px;color:var(--muted);font-weight:600}
+.grid{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin-bottom:14px}
+.cell{border:1px solid var(--line);border-radius:10px;text-align:center;padding:6px 2px;background:var(--bg)}
+.cell .jp{font-size:34px;display:block;line-height:1.2}
+.cell small{color:var(--muted)}
+.m-ok{background:var(--ok-soft);border-color:var(--ok)}
+.m-mid{background:var(--accent-soft)}
+.m-bad{background:var(--bad-soft);border-color:var(--bad)}
+.legend{font-size:13px;color:var(--muted)}
+.legend span{display:inline-block;width:12px;height:12px;border-radius:3px;vertical-align:-1px;margin:0 4px 0 10px;border:1px solid var(--line)}
+.link{background:none;border:none;color:var(--muted);text-decoration:underline;cursor:pointer;font:inherit;font-size:13px;padding:0}
+@media (max-width:420px){.big{font-size:104px}.word{font-size:48px}.btn{min-width:0;flex:1}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Тренажёр каны</h1>
+  <nav id="nav">
+    <button data-mode="choice">Знак → звук</button>
+    <button data-mode="rev">Звук → знак</button>
+    <button data-mode="card">Карточки</button>
+    <button data-mode="word">Слова</button>
+    <button data-mode="table">Таблица</button>
+  </nav>
+  <details>
+    <summary>Настройки: какие ряды и какая азбука</summary>
+    <div class="set" id="groups"><b>Ряды</b></div>
+    <div class="set" id="script"><b>Азбука</b>
+      <label><input type="radio" name="sc" value="hira"> хирагана</label>
+      <label><input type="radio" name="sc" value="kata"> катакана</label>
+      <label><input type="radio" name="sc" value="both"> обе</label>
+    </div>
+  </details>
+  <div class="card" id="stage"></div>
+  <div class="status"><span id="sess"></span><button class="link" id="reset">Сбросить статистику</button></div>
+  <div class="status" id="hard"></div>
+</div>
+<script>
+const GROUPS=[
+ {id:'a',label:'あ',items:[['あ','а','a'],['い','и','i'],['う','у','u'],['え','э','e'],['お','о','o']]},
+ {id:'ka',label:'か',items:[['か','ка','ka'],['き','ки','ki'],['く','ку','ku'],['け','кэ','ke'],['こ','ко','ko']]},
+ {id:'sa',label:'さ',items:[['さ','са','sa'],['し','си','shi'],['す','су','su'],['せ','сэ','se'],['そ','со','so']]},
+ {id:'ta',label:'た',items:[['た','та','ta'],['ち','ти','chi'],['つ','цу','tsu'],['て','тэ','te'],['と','то','to']]},
+ {id:'ga',label:'が',items:[['が','га','ga'],['ぎ','ги','gi'],['ぐ','гу','gu'],['げ','гэ','ge'],['ご','го','go']]},
+ {id:'za',label:'ざ',items:[['ざ','дза','za'],['じ','дзи','ji'],['ず','дзу','zu'],['ぜ','дзэ','ze'],['ぞ','дзо','zo']]},
+ {id:'da',label:'だ',items:[['だ','да','da'],['ぢ','дзи','ji (di)'],['づ','дзу','zu (du)'],['で','дэ','de'],['ど','до','do']]}
+];
+const WORDS=[
+ ['すし','суси','суши'],['さけ','сакэ','сакэ; лосось'],['たこ','тако','осьминог'],['いす','ису','стул'],
+ ['くつ','куцу','обувь'],['かさ','каса','зонт'],['した','сита','низ, под'],['うた','ута','песня'],
+ ['えき','эки','станция'],['そと','сото','снаружи'],['あき','аки','осень'],['つくえ','цукуэ','письменный стол'],
+ ['たかい','такай','высокий; дорогой'],['ちかてつ','тикатэцу','метро'],['かぜ','кадзэ','ветер; простуда'],
+ ['ちず','тидзу','карта'],['かぞく','кадзоку','семья'],['でぐち','дэгути','выход'],['あさ','аса','утро'],
+ ['いけ','икэ','пруд'],['かお','као','лицо'],['きく','кику','слушать; хризантема'],['すき','суки','нравится'],
+ ['あたたかい','ататакай','тёплый'],['とけい','токэй','часы'],['くち','кути','рот'],['ちいさい','тиисай','маленький'],
+ ['だいがく','дайгаку','университет'],['うえ','уэ','верх, над'],['いえ','иэ','дом'],['あし','аси','нога'],
+ ['した','сита','язык (орган)'],['おと','ото','звук'],['そこ','соко','там'],['ここ','коко','здесь'],
+ ['あおい','аой','синий'],['あかい','акай','красный'],['いち','ити','один'],['くうき','ку:ки','воздух'],
+ ['しごと','сигото','работа'],['ごご','гого','после полудня'],['かぎ','каги','ключ'],['かぐ','кагу','мебель'],
+ ['ちかい','тикай','близкий'],['だいじ','дайдзи','важный'],['けさ','кэса','сегодня утром'],['おとこ','отоко','мужчина']
+];
+const SIM={'さ':'ちきせ','ち':'さ','き':'さ','し':'つ','つ':'しう','せ':'さ','た':'な','あ':'お','お':'あ','い':'こ','こ':'い','く':'','け':'','す':'','て':'と','と':'て',
+ 'シ':'ツ','ツ':'シ','ク':'タケ','タ':'ク','ケ':'ク','チ':'テ','テ':'チ','サ':'セ','セ':'サ','ウ':'','コ':''};
+const toKata=s=>s.replace(/[ぁ-ゖ]/g,c=>String.fromCharCode(c.charCodeAt(0)+0x60));
+const isKata=c=>c.charCodeAt(0)>=0x30A0;
+const PAIR={};
+[['ka','ga'],['sa','za'],['ta','da']].forEach(([a,b])=>{const A=GROUPS.find(g=>g.id===a).items,B=GROUPS.find(g=>g.id===b).items;
+ A.forEach((x,i)=>{const h1=x[0],h2=B[i][0];PAIR[h1]=h2;PAIR[h2]=h1;PAIR[toKata(h1)]=toKata(h2);PAIR[toKata(h2)]=toKata(h1)})});
+
+const K='kana-trainer-v1';
+const $=id=>document.getElementById(id);
+const shuffle=a=>{for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a};
+function load(){try{const v=JSON.parse(localStorage.getItem(K));if(v&&v.stats&&v.settings)return v}catch(e){}
+ return {stats:{},settings:{groups:GROUPS.map(g=>g.id),script:'hira',mode:'choice'}}}
+function save(){try{localStorage.setItem(K,JSON.stringify(S))}catch(e){}}
+let S=load();
+let cur=null,curOpts=[],curWord=null,answered=false,last=null,lastWord=null,timer=null;
+const sess={r:0,w:0};
+const stage=$('stage');
+
+function st(ch){return S.stats[ch]||(S.stats[ch]={r:0,w:0,wt:3})}
+function pool(){const out=[],sc=S.settings.script;
+ for(const g of GROUPS){if(!S.settings.groups.includes(g.id))continue;
+  for(const [h,ru,ro] of g.items){if(sc!=='kata')out.push({ch:h,ru,ro});if(sc!=='hira')out.push({ch:toKata(h),ru,ro})}}
+ return out}
+function pick(p){let c=p.filter(x=>x.ch!==last);if(!c.length)c=p;
+ const tot=c.reduce((a,x)=>a+st(x.ch).wt,0);let r=Math.random()*tot;
+ for(const x of c){r-=st(x.ch).wt;if(r<=0){last=x.ch;return x}}
+ last=c[c.length-1].ch;return c[c.length-1]}
+function grade(ch,ok){const s=st(ch);
+ if(ok){s.r++;s.wt=Math.max(1,s.wt-1);sess.r++}else{s.w++;s.wt=Math.min(12,s.wt+4);sess.w++}
+ save();renderStatus()}
+function distractors(item,p){
+ const same=p.filter(x=>isKata(x.ch)===isKata(item.ch));
+ const simChars=((SIM[item.ch]||'').split('')).concat(PAIR[item.ch]||[]);
+ const used=new Set([item.ru]),res=[];
+ const sims=shuffle(same.filter(x=>simChars.includes(x.ch))).slice(0,2);
+ for(const x of [...sims,...shuffle(same.slice())]){if(res.length>=3)break;if(used.has(x.ru))continue;used.add(x.ru);res.push(x)}
+ return res}
+
+function renderChoice(rev){
+ const p=pool();cur=pick(p);answered=false;
+ curOpts=shuffle([cur,...distractors(cur,p)]);
+ const prompt=rev?`<div class="ru">${cur.ru}</div><div class="ro">${cur.ro}</div>`:`<div class="jp big">${cur.ch}</div>`;
+ stage.innerHTML=`<div class="prompt">${prompt}</div>
+  <div class="opts">${curOpts.map((o,i)=>`<button class="opt ${rev?'jp':''}" data-i="${i}"><span class="k">${i+1}</span>${rev?o.ch:`${o.ru}<small>${o.ro}</small>`}</button>`).join('')}</div>
+  <div class="fb" id="fb"><span class="ro">${rev?'Какой знак так читается?':'Как читается этот знак?'} Можно нажимать клавиши 1–4.</span></div>`;
+ stage.querySelectorAll('.opt').forEach(b=>b.onclick=()=>choose(+b.dataset.i))}
+function choose(i){if(answered||!curOpts[i])return;answered=true;
+ const o=curOpts[i],ok=o.ru===cur.ru;grade(cur.ch,ok);
+ stage.querySelectorAll('.opt').forEach((b,j)=>{if(curOpts[j].ru===cur.ru)b.classList.add('right');else if(j===i)b.classList.add('wrong');b.disabled=true});
+ if(ok){$('fb').innerHTML='<span class="ro">Верно!</span>';timer=setTimeout(next,700)}
+ else{$('fb').innerHTML=`Правильно: <span class="jp">${cur.ch}</span> — <b>${cur.ru}</b> (${cur.ro}).
+  Вы выбрали <span class="jp">${o.ch}</span> — ${o.ru}.<br><br><button class="btn primary" id="nx">Дальше<span class="k">Enter</span></button>`;
+  $('nx').onclick=next}}
+
+function renderCard(){
+ cur=pick(pool());answered=false;
+ stage.innerHTML=`<div class="prompt"><div class="jp big">${cur.ch}</div></div>
+  <div class="hint" id="hint">Скажите звук вслух, потом проверьте себя</div>
+  <div class="act" id="act"><button class="btn primary" id="show">Показать<span class="k">пробел</span></button></div>`;
+ $('show').onclick=reveal}
+function wordPool(){const allowed=new Set();
+ GROUPS.filter(g=>S.settings.groups.includes(g.id)).forEach(g=>g.items.forEach(x=>allowed.add(x[0])));
+ const seen=new Set();
+ return WORDS.filter(w=>{const k=w[0]+w[2];if(seen.has(k))return false;seen.add(k);return [...w[0]].every(c=>allowed.has(c))})}
+function renderWord(){
+ const wp=wordPool();answered=false;
+ if(!wp.length){stage.innerHTML='<div class="hint">Для выбранных рядов слов пока нет. Включите в настройках больше рядов.</div>';curWord=null;return}
+ let w;do{w=wp[Math.floor(Math.random()*wp.length)]}while(wp.length>1&&w[0]===lastWord);lastWord=w[0];
+ const sc=S.settings.script,kata=sc==='kata'||(sc==='both'&&Math.random()<.5);
+ curWord={shown:kata?toKata(w[0]):w[0],ru:w[1],mean:w[2]};
+ stage.innerHTML=`<div class="prompt"><div class="jp word">${curWord.shown}</div></div>
+  <div class="hint" id="hint">Прочитайте слово вслух, потом проверьте себя<br><small>Доступно слов: ${wp.length}</small></div>
+  <div class="act" id="act"><button class="btn primary" id="show">Показать<span class="k">пробел</span></button></div>`;
+ $('show').onclick=reveal}
+function reveal(){if(answered)return;
+ if(S.settings.mode==='card'){if(!cur)return;$('hint').innerHTML=`<div class="ru">${cur.ru}</div><div class="ro">${cur.ro}</div>`}
+ else{if(!curWord)return;$('hint').innerHTML=`<div class="ru">${curWord.ru}</div><div class="mean">${curWord.mean}</div>`}
+ answered=true;
+ $('act').innerHTML=`<button class="btn bad" id="no">Не вспомнил<span class="k">1</span></button><button class="btn good" id="yes">Вспомнил<span class="k">2</span></button>`;
+ $('no').onclick=()=>gradeCurrent(false);$('yes').onclick=()=>gradeCurrent(true)}
+function gradeCurrent(ok){
+ if(S.settings.mode==='card')grade(cur.ch,ok);
+ else{if(ok){sess.r++}else{sess.w++;[...curWord.shown].forEach(c=>{const s=st(c);s.wt=Math.min(12,s.wt+2)});save()}renderStatus()}
+ next()}
+
+function renderTable(){
+ const sc=S.settings.script,scripts=sc==='both'?['hira','kata']:[sc];let h='';
+ for(const s of scripts){h+=`<h3>${s==='hira'?'Хирагана':'Катакана'}</h3><div class="grid">`;
+  for(const g of GROUPS){if(!S.settings.groups.includes(g.id))continue;
+   for(const [c,ru] of g.items){const ch=s==='kata'?toKata(c):c,t=S.stats[ch];let cls='';
+    if(t&&t.r+t.w){const q=t.r/(t.r+t.w);cls=(q>=.85&&t.r>=3)?'m-ok':q<.6?'m-bad':'m-mid'}
+    h+=`<div class="cell ${cls}"><span class="jp">${ch}</span><small>${ru}</small></div>`}}
+  h+='</div>'}
+ h+=`<div class="legend">Цвет по вашим ответам:<span class="m-ok"></span>знаете<span class="m-mid"></span>почти<span class="m-bad"></span>путаете</div>`;
+ stage.innerHTML=h}
+
+function renderStatus(){
+ $('sess').textContent=`За этот раз: верно ${sess.r}, ошибок ${sess.w}`;
+ const arr=Object.entries(S.stats).filter(([,t])=>t.w>0).map(([c,t])=>[c,t.w/(t.r+t.w),t.w]).sort((a,b)=>b[1]-a[1]||b[2]-a[2]).slice(0,8);
+ $('hard').innerHTML=arr.length?`<span>Чаще всего путаете: ${arr.map(([c])=>`<span class="jp chip">${c}</span>`).join('')}</span>`:''}
+function render(){
+ clearTimeout(timer);const m=S.settings.mode;
+ document.querySelectorAll('#nav button').forEach(b=>b.classList.toggle('on',b.dataset.mode===m));
+ if(m==='choice')renderChoice(false);else if(m==='rev')renderChoice(true);
+ else if(m==='card')renderCard();else if(m==='word')renderWord();else renderTable();
+ renderStatus()}
+const next=render;
+
+// settings UI
+const gbox=$('groups');
+GROUPS.forEach(g=>{const l=document.createElement('label');
+ l.innerHTML=`<input type="checkbox" value="${g.id}"> <span class="jp" style="font-size:20px">${g.label}</span> ряд`;gbox.appendChild(l)});
+function syncSettingsUI(){
+ gbox.querySelectorAll('input').forEach(i=>i.checked=S.settings.groups.includes(i.value));
+ document.querySelectorAll('input[name=sc]').forEach(i=>i.checked=i.value===S.settings.script)}
+gbox.addEventListener('change',()=>{
+ const sel=[...gbox.querySelectorAll('input:checked')].map(i=>i.value);
+ if(!sel.length){syncSettingsUI();return}
+ S.settings.groups=sel;save();render()});
+document.querySelectorAll('input[name=sc]').forEach(i=>i.addEventListener('change',()=>{S.settings.script=i.value;save();render()}));
+$('nav').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;S.settings.mode=b.dataset.mode;save();render()});
+let resetArmed=null;
+$('reset').onclick=()=>{const b=$('reset');
+ if(!resetArmed){b.textContent='Точно стереть статистику? Нажмите ещё раз';resetArmed=setTimeout(()=>{resetArmed=null;b.textContent='Сбросить статистику'},4000);return}
+ clearTimeout(resetArmed);resetArmed=null;b.textContent='Сбросить статистику';S.stats={};save();sess.r=sess.w=0;render()};
+document.addEventListener('keydown',e=>{
+ if(e.target.tagName==='INPUT'||e.target.tagName==='SUMMARY')return;
+ const m=S.settings.mode;
+ if(m==='choice'||m==='rev'){
+  if(/^[1-4]$/.test(e.key)&&!answered){e.preventDefault();choose(+e.key-1)}
+  else if((e.key==='Enter'||e.key===' ')&&answered){e.preventDefault();next()}}
+ else if(m==='card'||m==='word'){
+  if((e.key===' '||e.key==='Enter')&&!answered){e.preventDefault();reveal()}
+  else if(answered&&(e.key==='1'||e.key==='2')){e.preventDefault();gradeCurrent(e.key==='2')}}});
+syncSettingsUI();render();
+</script>
+</body>
+</html>
