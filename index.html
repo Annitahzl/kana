@@ -24,6 +24,10 @@ summary{cursor:pointer;color:var(--muted);font-size:14px}
 .card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px;margin-top:12px;min-height:380px}
 .prompt{text-align:center;min-height:170px;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:8px 0}
 .big{font-size:128px;line-height:1.1}
+.listen{width:112px;height:112px;border-radius:50%;border:1px solid var(--accent);background:var(--accent-soft);color:var(--ink);font-size:46px;cursor:pointer;margin-bottom:8px}
+.listen:active{transform:scale(.95)}
+.opt.w{font-size:30px}
+.warn{margin-top:10px;padding:8px 12px;border-radius:10px;background:var(--bad-soft);color:var(--ink);font-size:14px;text-align:left}
 .word{font-size:64px;line-height:1.2}
 .ru{font-size:34px;font-weight:600}
 .ro{color:var(--muted)}
@@ -119,6 +123,7 @@ h3{margin:8px 0;font-size:15px;color:var(--muted);font-weight:600}
     <button data-mode="choice" id="navChoice">Знак → звук</button>
     <button data-mode="rev" id="navRev">Звук → знак</button>
     <button data-mode="card">Карточки</button>
+    <button data-mode="listen">На слух</button>
     <button data-mode="word">Слова</button>
     <button data-mode="table">Таблица</button>
   </nav>
@@ -459,9 +464,65 @@ function render(){
  $('navChoice').textContent=isKanji()?'Знак → смысл':'Знак → звук';
  $('navRev').textContent=isKanji()?'Смысл → знак':'Звук → знак';
  if(m==='choice')renderChoice(false);else if(m==='rev')renderChoice(true);
- else if(m==='card')renderCard();else if(m==='word')renderWord();else renderTable();
+ else if(m==='card')renderCard();else if(m==='word')renderWord();else if(m==='listen')renderListen();else renderTable();
  renderStatus()}
 const next=render;
+
+// ---- Озвучка: встроенный синтезатор речи устройства ----
+let jaVoice=null;
+function loadVoices(){try{const v=speechSynthesis.getVoices();jaVoice=v.find(x=>/^ja/i.test(x.lang))||null}catch(e){}}
+if('speechSynthesis' in window){loadVoices();speechSynthesis.onvoiceschanged=loadVoices}
+function say(text,rate){
+ if(!('speechSynthesis' in window))return;
+ try{speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(text);u.lang='ja-JP';if(jaVoice)u.voice=jaVoice;u.rate=rate||.85;speechSynthesis.speak(u)}catch(e){}}
+function voiceWarn(){
+ if(!('speechSynthesis' in window))return '<div class="warn">Этот браузер не умеет произносить текст. Откройте тренажёр в Chrome или Safari.</div>';
+ const v=speechSynthesis.getVoices();
+ if(v.length&&!v.some(x=>/^ja/i.test(x.lang)))return `<div class="warn">На устройстве не найден японский голос, поэтому звука может не быть.<br>
+  Windows: Параметры → Время и язык → Речь → Добавить голоса → японский.<br>
+  iPhone: Настройки → Универсальный доступ → Устный контент → Голоса → японский.<br>
+  Android: Настройки → Синтез речи → установить японский язык.</div>`;
+ return ''}
+
+// ---- Режим «На слух»: звучит слог, слово или чтение иероглифа, нужно выбрать написание ----
+let LQ=null;
+function listenWords(){if(isKanji())return [];let wp=wordPool();
+ if(hardMode())wp=wp.filter(w=>[...w[0]].some(c=>isHard(c)||isHard(toKata(c))));return wp}
+function renderListen(){
+ const p=pool(),tp=targets(p);answered=false;
+ if(!tp.length){LQ=null;answered=true;renderNoHard();return}
+ const wp=listenWords();let q;
+ if(wp.length>=4&&Math.random()<.35){
+  let w;do{w=wp[Math.floor(Math.random()*wp.length)]}while(wp.length>1&&w[0]===lastWord);lastWord=w[0];
+  const sc=S.settings.script,kata=sc==='kata'||(sc==='both'&&Math.random()<.5),cv=s=>kata?toKata(s):s;
+  const others=[];for(const x of shuffle(wp.slice())){if(others.length>=3)break;if(x[0]!==w[0]&&!others.some(o=>o[0]===x[0]))others.push(x)}
+  const all=shuffle([w,...others]);
+  q={kind:'word',say:w[0],ans:cv(w[0]),opts:all.map(x=>cv(x[0])),optSay:all.map(x=>x[0]),info:`${w[1]} — ${w[2]}`}
+ }else{
+  cur=pick(tp);const all=shuffle([cur,...distractors(cur,p)]);
+  q=cur.kanji
+   ?{kind:'kanji',ch:cur.ch,say:cur.ex.k,ans:cur.ex.w,opts:all.map(x=>x.ex.w),optSay:all.map(x=>x.ex.k),info:`<span class="jp">${cur.ex.k}</span> · ${cur.ex.r} — ${cur.ex.m}`}
+   :{kind:'syl',ch:cur.ch,say:cur.ch,ans:cur.ch,opts:all.map(x=>x.ch),optSay:all.map(x=>x.ch),info:`${cur.ru} (${cur.ro})`}
+ }
+ LQ=q;
+ stage.innerHTML=`<div class="prompt"><button class="listen" id="lsPlay" type="button" aria-label="Послушать ещё раз">🔊</button>
+  <button class="link" id="lsSlow" type="button">послушать медленнее</button></div>
+  <div class="opts">${q.opts.map((o,i)=>`<button class="opt jp ${q.kind==='syl'?'':'w'}" data-i="${i}"><span class="k">${i+1}</span>${o}</button>`).join('')}</div>
+  <div class="fb" id="fb"><span class="ro">Послушайте и выберите, как это пишется. Пробел — послушать ещё раз.</span>${voiceWarn()}</div>`;
+ $('lsPlay').onclick=()=>say(q.say);$('lsSlow').onclick=()=>say(q.say,.5);
+ stage.querySelectorAll('.opt').forEach(b=>b.onclick=()=>listenChoose(+b.dataset.i));
+ say(q.say)}
+function listenChoose(i){
+ const q=LQ;if(answered||!q||q.opts[i]===undefined)return;answered=true;
+ const ok=q.opts[i]===q.ans;
+ if(q.kind==='word'){if(ok)sess.r++;else{sess.w++;[...q.ans].forEach(c=>{const s=st(c);s.wt=Math.min(12,s.wt+2)})}save();renderStatus()}
+ else grade(q.ch,ok);
+ stage.querySelectorAll('.opt').forEach((b,j)=>{if(q.opts[j]===q.ans)b.classList.add('right');else if(j===i)b.classList.add('wrong');b.disabled=true});
+ $('fb').innerHTML=`${ok?'Верно!':'Не совсем.'} <span class="jp">${q.ans}</span> — ${q.info}
+  ${ok?'':`<br>Вы выбрали <span class="jp">${q.opts[i]}</span> <button class="link" type="button" id="lsMine">🔊 как звучит ваш вариант</button>`}
+  <br><br><button class="btn" type="button" id="lsAgain">🔊 Ещё раз</button> <button class="btn primary" type="button" id="nx">Дальше<span class="k">Enter</span></button>`;
+ $('lsAgain').onclick=()=>say(q.say);$('nx').onclick=next;
+ if(!ok)$('lsMine').onclick=()=>say(q.optSay[i])}
 
 // settings UI
 const gbox=$('groups');
@@ -499,9 +560,10 @@ document.addEventListener('keydown',e=>{
   else if((e.key==='Enter'||e.key===' ')&&TS.answered){e.preventDefault();testNext()}
   return}
  const m=S.settings.mode;
- if(m==='choice'||m==='rev'){
-  if(/^[1-4]$/.test(e.key)&&!answered){e.preventDefault();choose(+e.key-1)}
-  else if((e.key==='Enter'||e.key===' ')&&answered){e.preventDefault();next()}}
+ if(m==='choice'||m==='rev'||m==='listen'){
+  if(/^[1-4]$/.test(e.key)&&!answered){e.preventDefault();(m==='listen'?listenChoose:choose)(+e.key-1)}
+  else if((e.key==='Enter'||e.key===' ')&&answered){e.preventDefault();next()}
+  else if(m==='listen'&&e.key===' '&&!answered&&LQ){e.preventDefault();say(LQ.say)}}
  else if(m==='card'||m==='word'){
   if((e.key===' '||e.key==='Enter')&&!answered){e.preventDefault();reveal()}
   else if(answered&&(e.key==='1'||e.key==='2')){e.preventDefault();gradeCurrent(e.key==='2')}}});
