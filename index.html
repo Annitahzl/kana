@@ -5,9 +5,9 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Тренажёр каны</title>
 <style>
-:root{--bg:#f6f3ee;--card:#fffdf9;--ink:#2a2723;--muted:#7a736a;--line:#e3ddd3;--accent:#b5452f;--accent-ink:#fff;--accent-soft:#f6e6d6;--ok:#3d7a4f;--ok-soft:#dcefe1;--bad:#b23a3a;--bad-soft:#f6dcdc}
-@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#1c1a18;--card:#262320;--ink:#ece6dc;--muted:#a39a8e;--line:#3a3530;--accent:#e07a5f;--accent-ink:#1c1a18;--accent-soft:#3d3024;--ok:#7cc48f;--ok-soft:#21352a;--bad:#e08080;--bad-soft:#3d2424;color-scheme:dark}}
-:root[data-theme="dark"]{--bg:#1c1a18;--card:#262320;--ink:#ece6dc;--muted:#a39a8e;--line:#3a3530;--accent:#e07a5f;--accent-ink:#1c1a18;--accent-soft:#3d3024;--ok:#7cc48f;--ok-soft:#21352a;--bad:#e08080;--bad-soft:#3d2424;color-scheme:dark}
+:root{--bg:#f7f3f8;--card:#fffcff;--ink:#2a2230;--muted:#7a6f80;--line:#e6dde9;--accent:#640062;--accent-ink:#fff;--accent-soft:#f1dcef;--ok:#4f7d0c;--ok-soft:#e3f0d0;--bad:#c8361d;--bad-soft:#fbe0da}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#17121a;--card:#211a25;--ink:#f1ebf2;--muted:#a597aa;--line:#382d3d;--accent:#d39bd1;--accent-ink:#2a0f29;--accent-soft:#45173f;--ok:#a0c950;--ok-soft:#28351a;--bad:#ff7a63;--bad-soft:#40201d;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#17121a;--card:#211a25;--ink:#f1ebf2;--muted:#a597aa;--line:#382d3d;--accent:#d39bd1;--accent-ink:#2a0f29;--accent-soft:#45173f;--ok:#a0c950;--ok-soft:#28351a;--bad:#ff7a63;--bad-soft:#40201d;color-scheme:dark}
 *{box-sizing:border-box}
 body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
 .jp{font-family:"UD Digi Kyokasho N-R","UD デジタル 教科書体 N-R","Yu Mincho","YuMincho","Hiragino Mincho ProN","Noto Serif JP","MS Mincho",serif;font-weight:400}
@@ -92,6 +92,14 @@ h3{margin:8px 0;font-size:15px;color:var(--muted);font-weight:600}
 .timer.paused #tmText{color:var(--muted)}
 .timer.done{background:var(--ok-soft);border-color:var(--ok)}
 .timer.done i{background:var(--ok)}
+.tbox{display:flex;align-items:center;gap:6px}
+.check{width:24px;height:24px;border-radius:50%;background:var(--ok);color:var(--card);display:inline-flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;flex:none}
+.check[hidden]{display:none}
+.check.pop{animation:pop .7s ease-out}
+@keyframes pop{0%{transform:scale(.2)}60%{transform:scale(1.3)}100%{transform:scale(1)}}
+@media (prefers-reduced-motion:reduce){.check.pop{animation:none}}
+.grid.g{margin-bottom:6px}
+.rowtools{width:100%;font-size:13px;color:var(--muted)}
 .link{background:none;border:none;color:var(--muted);text-decoration:underline;cursor:pointer;font:inherit;font-size:13px;padding:0}
 @media (max-width:420px){.big{font-size:104px}.word{font-size:48px}.btn{min-width:0;flex:1}}
 </style>
@@ -100,8 +108,11 @@ h3{margin:8px 0;font-size:15px;color:var(--muted);font-weight:600}
 <div class="wrap">
   <div class="top">
     <h1>Тренажёр каны и иероглифов</h1>
-    <div class="timer" id="timer" title="Время занятий сегодня. Останавливается, если страница свёрнута или вы ничего не нажимаете 1,5 минуты.">
-      <span id="tmText">00:00</span><span class="tgoal" id="tmGoal">/ 10:00</span><span class="tstate" id="tmState"></span><i id="tmBar"></i>
+    <div class="tbox">
+      <span class="check" id="tmCheck" hidden title="Сегодня 10 минут есть">✓</span>
+      <div class="timer" id="timer" title="Время занятий сегодня. Останавливается, если страница свёрнута или вы ничего не нажимаете 1,5 минуты.">
+        <span id="tmText">00:00</span><span class="tgoal" id="tmGoal">/ 10:00</span><span class="tstate" id="tmState"></span><i id="tmBar"></i>
+      </div>
     </div>
   </div>
   <nav id="nav">
@@ -134,8 +145,22 @@ const GROUPS=[
  {id:'ta',label:'た',items:[['た','та','ta'],['ち','ти','chi'],['つ','цу','tsu'],['て','тэ','te'],['と','то','to']]},
  {id:'ga',label:'が',items:[['が','га','ga'],['ぎ','ги','gi'],['ぐ','гу','gu'],['げ','гэ','ge'],['ご','го','go']]},
  {id:'za',label:'ざ',items:[['ざ','дза','za'],['じ','дзи','ji'],['ず','дзу','zu'],['ぜ','дзэ','ze'],['ぞ','дзо','zo']]},
- {id:'da',label:'だ',items:[['だ','да','da'],['ぢ','дзи','ji (di)'],['づ','дзу','zu (du)'],['で','дэ','de'],['ど','до','do']]}
+ {id:'da',label:'だ',items:[['だ','да','da'],['ぢ','дзи','ji (di)'],['づ','дзу','zu (du)'],['で','дэ','de'],['ど','до','do']]},
+ {id:'na',label:'な',items:[['な','на','na'],['に','ни','ni'],['ぬ','ну','nu'],['ね','нэ','ne'],['の','но','no']]},
+ {id:'ha',label:'は',items:[['は','ха','ha'],['ひ','хи','hi'],['ふ','фу','fu'],['へ','хэ','he'],['ほ','хо','ho']]},
+ {id:'ma',label:'ま',items:[['ま','ма','ma'],['み','ми','mi'],['む','му','mu'],['め','мэ','me'],['も','мо','mo']]},
+ {id:'ya',label:'や',items:[['や','я','ya'],['ゆ','ю','yu'],['よ','ё','yo']]},
+ {id:'ra',label:'ら',items:[['ら','ра','ra'],['り','ри','ri'],['る','ру','ru'],['れ','рэ','re'],['ろ','ро','ro']]},
+ {id:'wa',label:'わ',suffix:'ряд и ん',items:[['わ','ва','wa'],['を','о (частица)','wo'],['ん','н','n']]},
+ {id:'ba',label:'ば',items:[['ば','ба','ba'],['び','би','bi'],['ぶ','бу','bu'],['べ','бэ','be'],['ぼ','бо','bo']]},
+ {id:'pa',label:'ぱ',items:[['ぱ','па','pa'],['ぴ','пи','pi'],['ぷ','пу','pu'],['ぺ','пэ','pe'],['ぽ','по','po']]},
+ {id:'yo',label:'きゃ',suffix:'сочетания',items:[['きゃ','кя','kya'],['きゅ','кю','kyu'],['きょ','кё','kyo'],['しゃ','ся','sha'],['しゅ','сю','shu'],['しょ','сё','sho'],
+  ['ちゃ','тя','cha'],['ちゅ','тю','chu'],['ちょ','тё','cho'],['にゃ','ня','nya'],['にゅ','ню','nyu'],['にょ','нё','nyo'],['ひゃ','хя','hya'],['ひゅ','хю','hyu'],['ひょ','хё','hyo'],
+  ['みゃ','мя','mya'],['みゅ','мю','myu'],['みょ','мё','myo'],['りゃ','ря','rya'],['りゅ','рю','ryu'],['りょ','рё','ryo']]},
+ {id:'yov',label:'ぎゃ',suffix:'звонкие сочетания',items:[['ぎゃ','гя','gya'],['ぎゅ','гю','gyu'],['ぎょ','гё','gyo'],['じゃ','дзя','ja'],['じゅ','дзю','ju'],['じょ','дзё','jo'],
+  ['びゃ','бя','bya'],['びゅ','бю','byu'],['びょ','бё','byo'],['ぴゃ','пя','pya'],['ぴゅ','пю','pyu'],['ぴょ','пё','pyo']]}
 ];
+const START_GROUPS=['a','ka','sa','ta','ga','za','da'];
 const WORDS=[
  ['すし','суси','суши'],['さけ','сакэ','сакэ; лосось'],['たこ','тако','осьминог'],['いす','ису','стул'],
  ['くつ','куцу','обувь'],['かさ','каса','зонт'],['した','сита','низ, под'],['うた','ута','песня'],
@@ -148,7 +173,26 @@ const WORDS=[
  ['した','сита','язык (орган)'],['おと','ото','звук'],['そこ','соко','там'],['ここ','коко','здесь'],
  ['あおい','аой','синий'],['あかい','акай','красный'],['いち','ити','один'],['くうき','ку:ки','воздух'],
  ['しごと','сигото','работа'],['ごご','гого','после полудня'],['かぎ','каги','ключ'],['かぐ','кагу','мебель'],
- ['ちかい','тикай','близкий'],['だいじ','дайдзи','важный'],['けさ','кэса','сегодня утром'],['おとこ','отоко','мужчина']
+ ['ちかい','тикай','близкий'],['だいじ','дайдзи','важный'],['けさ','кэса','сегодня утром'],['おとこ','отоко','мужчина'],
+ // слова с рядами な は ま や ら わ ん
+ ['ねこ','нэко','кошка'],['いぬ','ину','собака'],['はな','хана','цветок; нос'],['みみ','мими','ухо'],['て','тэ','рука'],['め','мэ','глаз'],
+ ['やま','яма','гора'],['かわ','кава','река'],['ほん','хон','книга'],['にほん','нихон','Япония'],['なまえ','намаэ','имя'],
+ ['ともだち','томодати','друг'],['せんせい','сэнсэй','учитель'],['がくせい','гакусэй','студент'],['わたし','ватаси','я'],
+ ['あなた','аната','ты, вы'],['みず','мидзу','вода'],['ひと','хито','человек'],['はし','хаси','палочки для еды; мост'],
+ ['さかな','сакана','рыба'],['にく','нику','мясо'],['ごはん','гохан','варёный рис; еда'],['りんご','ринго','яблоко'],
+ ['くるま','курума','машина'],['あした','асита','завтра'],['よる','ёру','ночь, вечер'],['ひる','хиру','день, полдень'],
+ ['はる','хару','весна'],['なつ','нацу','лето'],['ふゆ','фую','зима'],['あめ','амэ','дождь'],['ゆき','юки','снег'],
+ ['そら','сора','небо'],['うみ','уми','море'],['みせ','мисэ','магазин'],['へや','хэя','комната'],['まど','мадо','окно'],
+ ['とり','тори','птица'],['ぶた','бута','свинья'],['ばら','бара','роза'],['えんぴつ','эмпицу','карандаш'],['ぱん','пан','хлеб'],
+ ['ありがとう','аригато:','спасибо'],['さようなら','саё:нара','до свидания'],['おはよう','охаё:','доброе утро'],
+ ['こんにちは','коннити ва','здравствуйте (は здесь читается «ва»)'],['げんき','гэнки','бодрый, здоровый'],
+ ['おいしい','оисии','вкусный'],['たのしい','таносии','весёлый, приятный'],['おもしろい','омосирой','интересный'],
+ ['しろい','сирой','белый'],['くろい','курой','чёрный'],['ふね','фунэ','корабль'],['ほし','хоси','звезда'],['もり','мори','лес'],
+ // слова с сочетаниями きゃ, しゅ…
+ ['でんしゃ','дэнся','электричка'],['しゃしん','сясин','фотография'],['きょう','кё:','сегодня'],['おちゃ','отя','чай'],
+ ['ぎゅうにゅう','гю:ню:','молоко'],['じゅぎょう','дзюгё:','урок'],['りょこう','рёко:','путешествие'],
+ ['びょういん','бё:ин','больница'],['しゅくだい','сюкудай','домашнее задание'],['ひゃく','хяку','сто'],
+ ['りゅう','рю:','дракон'],['きゃく','кяку','гость'],['じしょ','дзисё','словарь'],['かいしゃ','кайся','компания, фирма']
 ];
 // Иероглифы: [знак, значение, он-чтение, он кириллицей, кун-чтение, кун кириллицей, пример, чтение примера, кириллицей, перевод]
 const KGROUPS=[
@@ -222,19 +266,23 @@ const kItem=t=>({ch:t[0],ru:t[1],ro:`он: ${t[2]} (${t[3]})`+(t[4]?` · кун:
 const isKanji=()=>S.settings.script==='kanji';
 const SIM={'日':'目月口','目':'日月','月':'日目','土':'上','上':'土下','下':'上','人':'八大','八':'人','大':'人火','火':'大',
  '千':'十','十':'千','二':'三','三':'二','口':'日中','中':'口','小':'水','水':'小','木':'大',
- 'さ':'ちきせ','ち':'さ','き':'さ','し':'つ','つ':'しう','せ':'さ','た':'な','あ':'お','お':'あ','い':'こ','こ':'い','く':'','け':'','す':'','て':'と','と':'て',
- 'シ':'ツ','ツ':'シ','ク':'タケ','タ':'ク','ケ':'ク','チ':'テ','テ':'チ','サ':'セ','セ':'サ','ウ':'','コ':''};
+ 'さ':'ちきせ','ち':'さら','き':'さ','し':'つも','つ':'しう','せ':'さや','た':'なに','あ':'おめ','お':'あむ','い':'こり','こ':'いに','く':'へ','け':'はほ','す':'む','て':'と','と':'て',
+ 'ぬ':'めね','め':'ぬあ','ね':'れわぬ','れ':'ねわ','わ':'ねれ','る':'ろ','ろ':'るそ','は':'ほけ','ほ':'はま','ま':'もほ','も':'まし','に':'こた','ら':'ち','り':'い','ゆ':'よ','よ':'ゆ','む':'すお','な':'た','の':'め','ふ':'う','へ':'く','を':'お','ん':'の','そ':'ろ','や':'せ',
+ 'シ':'ツンソ','ツ':'シソン','ン':'ソシ','ソ':'ンツ','ク':'タケワ','タ':'クヌ','ケ':'ク','チ':'テ','テ':'チ','サ':'セ','セ':'サ','ウ':'ワフ','ワ':'ウフ','フ':'ワ',
+ 'ヌ':'スメ','ス':'ヌ','ノ':'メ','メ':'ノヌ','ア':'マ','マ':'ア','ユ':'コ','コ':'ユロ','ロ':'コ','ル':'レ','レ':'ル','ナ':'メ','ヲ':'ラ','ラ':'ヲ'};
 const toKata=s=>s.replace(/[ぁ-ゖ]/g,c=>String.fromCharCode(c.charCodeAt(0)+0x60));
 const isKata=c=>c.charCodeAt(0)>=0x30A0;
+// Пары «глухой — звонкий» (か/が, は/ば/ぱ…) тоже идут в похожие варианты ответа
 const PAIR={};
-[['ka','ga'],['sa','za'],['ta','da']].forEach(([a,b])=>{const A=GROUPS.find(g=>g.id===a).items,B=GROUPS.find(g=>g.id===b).items;
- A.forEach((x,i)=>{const h1=x[0],h2=B[i][0];PAIR[h1]=h2;PAIR[h2]=h1;PAIR[toKata(h1)]=toKata(h2);PAIR[toKata(h2)]=toKata(h1)})});
+const addPair=(x,y)=>{(PAIR[x]=PAIR[x]||[]).push(y)};
+[['ka','ga'],['sa','za'],['ta','da'],['ha','ba'],['ha','pa'],['ba','pa']].forEach(([a,b])=>{const A=GROUPS.find(g=>g.id===a).items,B=GROUPS.find(g=>g.id===b).items;
+ A.forEach((x,i)=>{const h1=x[0],h2=B[i][0];addPair(h1,h2);addPair(h2,h1);addPair(toKata(h1),toKata(h2));addPair(toKata(h2),toKata(h1))})});
 
 const K='kana-trainer-v1';
 const $=id=>document.getElementById(id);
 const shuffle=a=>{for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a};
 function load(){try{const v=JSON.parse(localStorage.getItem(K));if(v&&v.stats&&v.settings)return v}catch(e){}
- return {stats:{},settings:{groups:GROUPS.map(g=>g.id),script:'hira',mode:'choice'}}}
+ return {stats:{},settings:{groups:START_GROUPS.slice(),script:'hira',mode:'choice'}}}
 function save(){try{localStorage.setItem(K,JSON.stringify(S))}catch(e){}}
 let S=load();
 if(!Array.isArray(S.settings.kgroups)||!S.settings.kgroups.length)S.settings.kgroups=KGROUPS.map(g=>g.id);
@@ -304,7 +352,7 @@ function renderCard(){
 function wordPool(){
  if(isKanji())return pool().map(x=>[x.ex.w,`<span class="jp">${x.ex.k}</span> · ${x.ex.r}`,x.ex.m]);
  const allowed=new Set();
- GROUPS.filter(g=>S.settings.groups.includes(g.id)).forEach(g=>g.items.forEach(x=>allowed.add(x[0])));
+ GROUPS.filter(g=>S.settings.groups.includes(g.id)).forEach(g=>g.items.forEach(x=>[...x[0]].forEach(c=>allowed.add(c))));
  const seen=new Set();
  return WORDS.filter(w=>{const k=w[0]+w[2];if(seen.has(k))return false;seen.add(k);return [...w[0]].every(c=>allowed.has(c))})}
 function renderWord(){
@@ -342,12 +390,10 @@ function renderTable(){
    h+=`<h3>${g.label}</h3><div class="grid">`+g.items.map(t=>`<div class="cell k ${cellCls(t[0])}"><span class="jp">${t[0]}</span><small>${t[1]}</small></div>`).join('')+'</div>'}
   stage.innerHTML=h+LEGEND;return}
  const sc=S.settings.script,scripts=sc==='both'?['hira','kata']:[sc];let h='';
- for(const s of scripts){h+=`<h3>${s==='hira'?'Хирагана':'Катакана'}</h3><div class="grid">`;
+ for(const s of scripts){h+=`<h3>${s==='hira'?'Хирагана':'Катакана'}</h3>`;
   for(const g of GROUPS){if(!S.settings.groups.includes(g.id))continue;
-   for(const [c,ru] of g.items){const ch=s==='kata'?toKata(c):c,t=S.stats[ch];let cls='';
-    if(t&&t.r+t.w){const q=t.r/(t.r+t.w);cls=(q>=.85&&t.r>=3)?'m-ok':q<.6?'m-bad':'m-mid'}
-    h+=`<div class="cell ${cls}"><span class="jp">${ch}</span><small>${ru}</small></div>`}}
-  h+='</div>'}
+   h+=`<div class="grid g"${g.id.startsWith('yo')?' style="grid-template-columns:repeat(3,1fr)"':''}>`+g.items.map(([c,ru])=>{const ch=s==='kata'?toKata(c):c;
+    return `<div class="cell ${cellCls(ch)}"><span class="jp">${ch}</span><small>${ru}</small></div>`}).join('')+'</div>'}}
  h+=`<div class="legend">Цвет по вашим ответам:<span class="m-ok"></span>знаете<span class="m-mid"></span>почти<span class="m-bad"></span>путаете</div>`;
  stage.innerHTML=h}
 
@@ -423,7 +469,10 @@ const gKey=()=>isKanji()?'kgroups':'groups';
 function buildGroupsUI(){
  gbox.innerHTML=isKanji()
   ?'<b>Темы</b>'+KGROUPS.map(g=>`<label><input type="checkbox" value="${g.id}"> ${g.label} <span class="jp" style="font-size:18px">${g.items.slice(0,3).map(t=>t[0]).join('')}…</span></label>`).join('')
-  :'<b>Ряды</b>'+GROUPS.map(g=>`<label><input type="checkbox" value="${g.id}"> <span class="jp" style="font-size:20px">${g.label}</span> ряд</label>`).join('')}
+  :'<b>Ряды</b>'+GROUPS.map(g=>`<label><input type="checkbox" value="${g.id}"> <span class="jp" style="font-size:20px">${g.label}</span> ${g.suffix||'ряд'}</label>`).join('')+
+   '<span class="rowtools"><button class="link" type="button" id="allRows">включить все</button> · <button class="link" type="button" id="startRows">только начальные</button></span>';
+ const setRows=ids=>{S.settings.groups=ids;save();syncSettingsUI();render()};
+ if($('allRows')){$('allRows').onclick=()=>setRows(GROUPS.map(g=>g.id));$('startRows').onclick=()=>setRows(START_GROUPS.slice())}}
 function syncSettingsUI(){
  buildGroupsUI();
  gbox.querySelectorAll('input').forEach(i=>i.checked=S.settings[gKey()].includes(i.value));
@@ -467,12 +516,15 @@ function isActive(){return document.visibilityState==='visible'&&Date.now()-last
 function drawTimer(){
  const t=timeObj(),done=t.sec>=GOAL,act=isActive();
  $('tmText').textContent=fmt(t.sec);
- $('tmGoal').textContent=done?'✓ цель':'/ 10:00';
  $('tmState').textContent=act?'':'пауза';
  $('tmBar').style.width=Math.min(100,t.sec/GOAL*100)+'%';
- $('timer').classList.toggle('done',done);$('timer').classList.toggle('paused',!act)}
+ $('timer').classList.toggle('done',done);$('timer').classList.toggle('paused',!act);
+ $('tmCheck').hidden=!done}
 let tick=0;
-setInterval(()=>{if(isActive()){timeObj().sec++;if(++tick%5===0||timeObj().sec===GOAL)save()}drawTimer()},1000);
+setInterval(()=>{if(isActive()){const t=timeObj();t.sec++;if(++tick%5===0)save();
+  if(t.sec===GOAL){save();drawTimer();const c=$('tmCheck');c.classList.remove('pop');void c.offsetWidth;c.classList.add('pop')}}
+ drawTimer()},1000);
+delete S.done;
 document.addEventListener('visibilitychange',()=>{save();drawTimer()});
 drawTimer();
 
