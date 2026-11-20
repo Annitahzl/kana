@@ -89,6 +89,7 @@ h3{margin:8px 0;font-size:15px;color:var(--muted);font-weight:600}
 .res .jp{font-size:22px}
 .top{display:flex;align-items:center;justify-content:space-between;gap:8px 12px;flex-wrap:wrap;margin:4px 0 12px}
 .top h1{margin:0}
+.jpt{color:var(--ok);font-size:22px;margin-left:10px;letter-spacing:.05em;white-space:nowrap}
 .timer{position:relative;overflow:hidden;padding:6px 14px 8px;border:1px solid var(--line);border-radius:999px;background:var(--card);font-variant-numeric:tabular-nums;font-size:16px;font-weight:600;white-space:nowrap}
 .timer i{position:absolute;left:0;bottom:0;height:3px;width:0;background:var(--accent);transition:width .5s}
 .tgoal{color:var(--muted);font-weight:400;margin-left:4px}
@@ -111,7 +112,7 @@ h3{margin:8px 0;font-size:15px;color:var(--muted);font-weight:600}
 <body>
 <div class="wrap">
   <div class="top">
-    <h1>Тренажёр каны и иероглифов</h1>
+    <h1>Тренажёр каны и иероглифов<span class="jpt jp" lang="ja">かな・漢字</span></h1>
     <div class="tbox">
       <span class="check" id="tmCheck" hidden title="Сегодня 10 минут есть">✓</span>
       <div class="timer" id="timer" title="Время занятий сегодня. Останавливается, если страница свёрнута или вы ничего не нажимаете 1,5 минуты.">
