@@ -82,6 +82,7 @@ h3{margin:8px 0;font-size:15px;color:var(--muted);font-weight:600}
 .tr{text-align:center;color:var(--muted);margin-bottom:16px;font-size:17px}
 .opt.t{font-size:26px;line-height:1.3}
 .rd{font-size:18px;margin:6px 0}
+.rdq{font-size:30px;font-weight:600;text-align:center;margin:22px 0 6px;line-height:1.3}
 .say{color:var(--muted);font-size:14px}
 .score{font-size:56px;font-weight:700;text-align:center;margin:10px 0 0}
 .res{list-style:none;padding:0;margin:16px 0;display:grid;gap:10px}
@@ -137,7 +138,7 @@ h3{margin:8px 0;font-size:15px;color:var(--muted);font-weight:600}
       <label><input type="radio" name="sc" value="kanji"> иероглифы</label>
     </div>
     <div class="set" id="groups"></div>
-    <div class="set"><b>Проверка</b><button class="btn primary small" id="startTest">Тест: 10 предложений</button></div>
+    <div class="set"><b>Проверка</b><button class="btn primary small" id="startTest">Тест: популярные фразы</button><button class="btn primary small" id="startSay">Тест: произношение</button></div>
   </details>
   <div class="card" id="stage"></div>
   <div class="status"><span id="sess"></span><button class="btn bad small" id="trainHard" hidden>Тренировать ошибки</button><button class="link" id="reset">Сбросить статистику</button></div>
@@ -237,35 +238,35 @@ const KGROUPS=[
   ['上','верх','ジョウ','дзё:','うえ','уэ','上手','じょうず','дзё:дзу','умелый'],
   ['下','низ','カ, ゲ','ка, гэ','した','сита','地下鉄','ちかてつ','тикатэцу','метро']]}
 ];
-// Тест: [предложение с ＿, ответ, 3 неверных варианта, перевод, чтение]
+// Тест «Фразы для поездки»: [предложение с ＿, ответ, 3 неверных варианта, перевод, чтение]
 const TEST={
  hira:[
-  ['これは ＿ です。','かさ',['いす','くつ','たこ'],'Это зонт.','Корэ ва каса дэс.'],
-  ['＿が すきです。','すし',['さけ','あさ','うた'],'Я люблю суши.','Суси га суки дэс.'],
-  ['＿は どこですか。','えき',['いけ','かお','くち'],'Где станция?','Эки ва доко дэс ка?'],
-  ['＿に いきます。','だいがく',['かぞく','とけい','つくえ'],'Я иду в университет.','Дайгаку ни икимас.'],
-  ['＿は たかいです。','とけい',['あし','いす','かさ'],'Часы дорогие.','Токэй ва такай дэс.'],
-  ['＿は ちいさいです。','いけ',['えき','いえ','かお'],'Пруд маленький.','Икэ ва тиисай дэс.'],
-  ['＿が いたいです。','あし',['くち','した','かお'],'Болит нога.','Аси га итай дэс.'],
-  ['＿を ききます。','うた',['いす','すし','かぜ'],'Я слушаю песню.','Ута о кикимас.']],
+  ['＿を ください。','みず',['おちゃ','さけ','ごはん'],'Воды, пожалуйста.','Мидзу о кудасай.'],
+  ['＿、えきは どこですか。','すみません',['ありがとう','こんにちは','さようなら'],'Извините, где станция?','Сумимасэн, эки ва доко дэс ка?'],
+  ['ありがとう ＿。','ございます',['ください','すみません','おねがいします'],'Большое спасибо.','Аригато: годзаимас.'],
+  ['おかいけいを ＿。','おねがいします',['ございます','すみません','こんにちは'],'Счёт, пожалуйста.','Окайкэй о онэгай симас.'],
+  ['これは ＿ですか。','いくら',['どこ','だれ','いつ'],'Сколько это стоит?','Корэ ва икура дэс ка?'],
+  ['＿は ありますか。','ちず',['かさ','かぎ','くすり'],'У вас есть карта?','Тидзу ва аримас ка?'],
+  ['へやの ＿を なくしました。','かぎ',['かさ','くつ','ちず'],'Я потеряла ключ от номера.','Хэя но каги о накусимасита.'],
+  ['＿が いたいです。','あたま',['おなか','あし','のど'],'У меня болит голова.','Атама га итай дэс.']],
  kata:[
-  ['＿を たべます。','ケーキ',['タクシー','スカート','ギター'],'Я ем торт.','Кэ:ки о табэмас.'],
-  ['＿で いきます。','タクシー',['ケーキ','ソース','コート'],'Я поеду на такси.','Такуси: дэ икимас.'],
-  ['＿を ひきます。','ギター',['スキー','テスト','ケース'],'Я играю на гитаре.','Гита: о хикимас.'],
-  ['あしたは ＿です。','テスト',['デザート','サイズ','ココア'],'Завтра контрольная.','Асита ва тэсуто дэс.'],
-  ['＿を のみます。','ココア',['スーツ','ガス','カード'],'Я пью какао.','Кокоа о номимас.'],
-  ['＿が すきです。','スキー',['ケース','ガス','コート'],'Я люблю кататься на лыжах.','Суки: га суки дэс.'],
-  ['＿は なんですか。','デザート',['サイズ','ソース','スーツ'],'Что на десерт?','Дэдза:то ва нан дэс ка?']],
+  ['＿は どこですか。','トイレ',['ホテル','レストラン','エレベーター'],'Где туалет?','Тоирэ ва доко дэс ка?'],
+  ['＿を ください。','メニュー',['コーヒー','ビール','タオル'],'Меню, пожалуйста.','Мэню: о кудасай.'],
+  ['＿で はらえますか。','カード',['ホテル','ビール','タオル'],'Можно оплатить картой?','Ка:до дэ хараэмас ка?'],
+  ['＿を ふたつ ください。','コーヒー',['ビール','ジュース','ワイン'],'Два кофе, пожалуйста.','Ко:хи: о футацу кудасай.'],
+  ['＿は ありますか。','ワイファイ',['タオル','エレベーター','レストラン'],'Здесь есть вай-фай?','Вайфай ва аримас ка?'],
+  ['＿を もう ひとつ ください。','タオル',['メニュー','カード','ビール'],'Ещё одно полотенце, пожалуйста.','Таору о мо: хитоцу кудасай.'],
+  ['＿を よんで ください。','タクシー',['ホテル','トイレ','エレベーター'],'Вызовите, пожалуйста, такси.','Такуси: о ёндэ кудасай.'],
+  ['＿は なんじですか。','チェックアウト',['チェックイン','レストラン','エレベーター'],'Во сколько выезд из отеля (чек-аут)?','Тэккуауто ва нандзи дэс ка?']],
  kanji:[
-  ['わたしは ＿です。','日本人',['大学','中国','月曜日'],'Я японец.','Ватаси ва нихондзин дэс.'],
-  ['＿に いきます。','中国',['富士山','大学','入口'],'Я еду в Китай.','Тю:гоку ни икимас.'],
-  ['きょうは ＿です。','月曜日',['水曜日','金曜日','土曜日'],'Сегодня понедельник.','Кё: ва гэцуё:би дэс.'],
-  ['これは ＿です。','千円',['百円','三百','十月'],'Это тысяча иен.','Корэ ва сэн-эн дэс.'],
-  ['＿に のぼります。','富士山',['小川','中国','入口'],'Я поднимаюсь на Фудзи.','Фудзисан ни ноборимас.'],
-  ['＿は あそこです。','入口',['大学','地下鉄','小川'],'Вход вон там.','Иригути ва асоко дэс.'],
-  ['＿で いきます。','地下鉄',['富士山','入口','上手'],'Я поеду на метро.','Тикатэцу дэ икимас.'],
-  ['たんじょうびは ＿です。','四月',['七月','九月','一月'],'День рождения в апреле.','Тандзё:би ва сигацу дэс.'],
-  ['あしたは ＿です。','金曜日',['火曜日','木曜日','日曜日'],'Завтра пятница.','Асита ва кинъё:би дэс.']]
+  ['＿は どこですか。','入口',['出口','地下鉄','大学'],'Где вход?','Иригути ва доко дэс ка?'],
+  ['＿は あちらです。','出口',['入口','地下鉄','上手'],'Выход вон там.','Дэгути ва атира дэс.'],
+  ['＿で いきます。','地下鉄',['入口','出口','大学'],'Поеду на метро.','Тикатэцу дэ икимас.'],
+  ['お＿を ください。','水',['金','火','木'],'Воды, пожалуйста (в кафе).','Омидзу о кудасай.'],
+  ['これは ＿ですか。','千円',['百円','五百円','三千円'],'Это стоит тысячу иен?','Корэ ва сэн-эн дэс ка?'],
+  ['＿です。','二人',['一人','三人','四人'],'Нас двое (столик на двоих).','Футари дэс.'],
+  ['レストランは ＿です。','下',['上','中','大'],'Ресторан внизу.','Рэсуторан ва сита дэс.'],
+  ['日本語が ＿ですね。','上手',['中国','大学','入口'],'Вы хорошо говорите по-японски! (так часто хвалят туристов)','Нихонго га дзё:дзу дэс нэ.']]
 };
 const kItem=t=>({ch:t[0],ru:t[1],ro:`он: ${t[2]} (${t[3]})`+(t[4]?` · кун: ${t[4]} (${t[5]})`:''),
  ex:{w:t[6],k:t[7],r:t[8],m:t[9]},kanji:true});
@@ -415,47 +416,61 @@ function renderStatus(){
 // ---- Тест ----
 let TS=null;
 const TN=10;
-function startTest(){
+// kind: 'fill' — вставить пропущенное слово; 'say' — по русской транскрипции выбрать перевод
+const plainRu=t=>t.replace(/\s*\([^)]*\)\s*$/,'');
+function startTest(kind){
+ kind=kind==='say'?'say':'fill';
  const take=(a,n)=>shuffle(a.slice()).slice(0,n);
- const qs=shuffle([...take(TEST.hira,3),...take(TEST.kata,3),...take(TEST.kanji,4)])
-  .map(q=>({s:q[0],a:q[1],opts:shuffle([q[1],...q[2]]),ru:q[3],rd:q[4]}));
- TS={qs,i:0,ok:0,wrong:[],answered:false};
+ const picked=shuffle([...take(TEST.hira,3),...take(TEST.kata,3),...take(TEST.kanji,4)]);
+ const all=[...TEST.hira,...TEST.kata,...TEST.kanji];
+ const qs=picked.map(q=>{
+  const base={s:q[0],a:q[1],ru:q[3],rd:q[4],jp:q[0].replace('＿',q[1])};
+  if(kind==='fill')return {...base,ans:q[1],opts:shuffle([q[1],...q[2]])};
+  const ans=plainRu(q[3]),others=[];
+  for(const x of shuffle(all.slice())){if(others.length>=3)break;const t=plainRu(x[3]);if(t!==ans&&!others.includes(t))others.push(t)}
+  return {...base,ans,opts:shuffle([ans,...others])}});
+ TS={kind,qs,i:0,ok:0,wrong:[],answered:false};
  document.querySelector('details').open=false;render();window.scrollTo({top:0,behavior:'smooth'})}
 const fillS=(q,html)=>q.s.replace('＿',html);
 function renderTest(){
  if(TS.i>=TS.qs.length)return renderResults();
- const q=TS.qs[TS.i];TS.answered=false;
- stage.innerHTML=`<div class="tmeta"><span>Тест · предложение ${TS.i+1} из ${TS.qs.length}</span><span>верно: ${TS.ok}</span></div>
-  <div class="progress"><i style="width:${TS.i/TS.qs.length*100}%"></i></div>
-  <div class="tq jp">${fillS(q,'<span class="blank">？</span>')}</div>
-  <div class="tr">${q.ru}</div>
-  <div class="opts">${q.opts.map((o,i)=>`<button class="opt jp t" data-i="${i}"><span class="k">${i+1}</span>${o}</button>`).join('')}</div>
-  <div class="fb" id="fb"><span class="ro">Какое слово пропущено? Можно нажимать клавиши 1–4.</span></div>`;
+ const q=TS.qs[TS.i],isSay=TS.kind==='say';TS.answered=false;
+ const head=`<div class="tmeta"><span>${isSay?'Произношение':'Тест'} · фраза ${TS.i+1} из ${TS.qs.length}</span><span>верно: ${TS.ok}</span></div>
+  <div class="progress"><i style="width:${TS.i/TS.qs.length*100}%"></i></div>`;
+ const body=isSay
+  ?`<div class="rdq">${q.rd}</div>
+    <div class="tr"><button class="link" type="button" id="tSay">🔊 послушать</button></div>`
+  :`<div class="tq jp">${fillS(q,'<span class="blank">？</span>')}</div><div class="tr">${q.ru}</div>`;
+ stage.innerHTML=head+body+`
+  <div class="opts">${q.opts.map((o,i)=>`<button class="opt ${isSay?'m':'jp t'}" data-i="${i}"><span class="k">${i+1}</span>${o}</button>`).join('')}</div>
+  <div class="fb" id="fb"><span class="ro">${isSay?'Прочитайте фразу вслух и выберите, что она значит.':'Какое слово пропущено?'} Можно нажимать клавиши 1–4.</span></div>`;
+ if(isSay)$('tSay').onclick=()=>say(q.jp);
  stage.querySelectorAll('.opt').forEach(b=>b.onclick=()=>testChoose(+b.dataset.i))}
 function testChoose(i){
  if(!TS||TS.answered)return;const q=TS.qs[TS.i];if(!q||q.opts[i]===undefined)return;
- TS.answered=true;const ok=q.opts[i]===q.a;
+ TS.answered=true;const ok=q.opts[i]===q.ans;
  if(ok)TS.ok++;else TS.wrong.push({...q,picked:q.opts[i]});
- stage.querySelectorAll('.opt').forEach((b,j)=>{if(q.opts[j]===q.a)b.classList.add('right');else if(j===i)b.classList.add('wrong');b.disabled=true});
+ stage.querySelectorAll('.opt').forEach((b,j)=>{if(q.opts[j]===q.ans)b.classList.add('right');else if(j===i)b.classList.add('wrong');b.disabled=true});
  const last=TS.i===TS.qs.length-1;
  $('fb').innerHTML=`<div>${ok?'Верно!':'Не совсем.'}</div>
   <div class="jp tq" style="font-size:24px;margin:6px 0 0">${fillS(q,`<span class="fill">${q.a}</span>`)}</div>
-  <div class="rd">${q.rd}</div>
-  <div class="say">Прочитайте предложение вслух 2–3 раза</div><br>
+  <div class="rd">${q.rd}</div><div class="ro">${q.ru}</div>
+  <div class="say">Прочитайте фразу вслух 2–3 раза · <button class="link" type="button" id="tSay2">🔊 послушать</button></div><br>
   <button class="btn primary" id="tnx">${last?'Результат':'Дальше'}<span class="k">Enter</span></button>`;
+ $('tSay2').onclick=()=>say(q.jp);
  $('tnx').onclick=testNext}
 function testNext(){if(!TS)return;TS.i++;renderTest()}
 function renderResults(){
  const n=TS.qs.length,ok=TS.ok;
- const msg=ok===n?'Отлично! Все предложения правильно.':ok>=7?'Хороший результат!':ok>=4?'Неплохо для начала. Повторите слова и попробуйте ещё раз.':'Сначала потренируйте слова в режимах «Слова» и «Карточки», потом возвращайтесь.';
+ const msg=ok===n?'Отлично! Все фразы правильно.':ok>=7?'Хороший результат!':ok>=4?'Неплохо для начала. Повторите фразы и попробуйте ещё раз.':'Прочитайте фразы ниже вслух и попробуйте ещё раз.';
  stage.innerHTML=`<div class="tmeta"><span>Тест закончен</span></div>
   <div class="progress"><i style="width:100%"></i></div>
   <div class="score">${ok} из ${n}</div><p class="tr">${msg}</p>
-  ${TS.wrong.length?`<h3>Ошибки — прочитайте эти предложения вслух:</h3><ul class="res">${TS.wrong.map(q=>`<li>
+  ${TS.wrong.length?`<h3>Ошибки — прочитайте эти фразы вслух:</h3><ul class="res">${TS.wrong.map(q=>`<li>
    <div class="jp">${fillS(q,`<span class="fill">${q.a}</span>`)}</div>
-   <div>${q.rd}</div><div class="ro">${q.ru} Вы выбрали: <span class="jp">${q.picked}</span></div></li>`).join('')}</ul>`:''}
+   <div>${q.rd}</div><div class="ro">${q.ru} Вы выбрали: <span class="${TS.kind==='say'?'':'jp'}">${q.picked}</span></div></li>`).join('')}</ul>`:''}
   <div class="act"><button class="btn primary" id="tAgain">Новый тест</button><button class="btn" id="tBack">К тренировке</button></div>`;
- $('tAgain').onclick=startTest;
+ const k=TS.kind;$('tAgain').onclick=()=>startTest(k);
  $('tBack').onclick=()=>{TS=null;render()}}
 
 function render(){
@@ -547,7 +562,7 @@ gbox.addEventListener('change',()=>{
  if(!sel.length){syncSettingsUI();return}
  S.settings[gKey()]=sel;save();render()});
 document.querySelectorAll('input[name=sc]').forEach(i=>i.addEventListener('change',()=>{S.settings.script=i.value;last=null;lastWord=null;save();syncSettingsUI();render()}));
-$('startTest').onclick=startTest;
+$('startTest').onclick=()=>startTest('fill');$('startSay').onclick=()=>startTest('say');
 $('nav').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;TS=null;S.settings.mode=b.dataset.mode;save();render()});
 let resetArmed=null;
 $('reset').onclick=()=>{const b=$('reset');
