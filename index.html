@@ -138,7 +138,7 @@ h3{margin:8px 0;font-size:15px;color:var(--muted);font-weight:600}
       <label><input type="radio" name="sc" value="kanji"> иероглифы</label>
     </div>
     <div class="set" id="groups"></div>
-    <div class="set"><b>Проверка</b><button class="btn primary small" id="startTest">Тест: популярные фразы</button><button class="btn primary small" id="startSay">Тест: произношение</button></div>
+    <div class="set"><b>Проверка</b><button class="btn primary small" id="startTest">Тест: популярные фразы</button><button class="btn primary small" id="startSay">Тест: произношение</button><button class="btn primary small" id="startPart">Тест: частицы</button></div>
   </details>
   <div class="card" id="stage"></div>
   <div class="status"><span id="sess"></span><button class="btn bad small" id="trainHard" hidden>Тренировать ошибки</button><button class="link" id="reset">Сбросить статистику</button></div>
@@ -268,6 +268,35 @@ const TEST={
   ['レストランは ＿です。','下',['上','中','大'],'Ресторан внизу.','Рэсуторан ва сита дэс.'],
   ['日本語が ＿ですね。','上手',['中国','大学','入口'],'Вы хорошо говорите по-японски! (так часто хвалят туристов)','Нихонго га дзё:дзу дэс нэ.']]
 };
+// Тест «Частицы»: [предложение с ＿, частица, 3 неверные частицы, перевод, чтение]
+const PARTS=[
+ ['すし＿ おいしいです。','は',['を','で','に'],'Суши вкусные.','Суси ва оисии дэс.'],
+ ['わたし＿ がくせいです。','は',['を','で','に'],'Я студентка.','Ватаси ва гакусэй дэс.'],
+ ['えき＿ どこですか。','は',['を','で','に'],'Где станция?','Эки ва доко дэс ка?'],
+ ['すし＿ すきです。','が',['を','で','に'],'Я люблю суши.','Суси га суки дэс.'],
+ ['ねこ＿ います。','が',['を','で','の'],'Тут есть кошка.','Нэко га имас.'],
+ ['あたま＿ いたいです。','が',['を','で','に'],'Болит голова.','Атама га итай дэс.'],
+ ['すし＿ たべます。','を',['に','で','の'],'Я ем суши.','Суси о табэмас.'],
+ ['おちゃ＿ のみます。','を',['に','で','の'],'Я пью чай.','Отя о номимас.'],
+ ['コーヒー＿ ください。','を',['で','の','に'],'Кофе, пожалуйста.','Ко:хи: о кудасай.'],
+ ['わたし＿ すし','の',['を','で','に'],'мои суши','Ватаси но суси'],
+ ['わたし＿ かばん','の',['を','で','が'],'моя сумка','Ватаси но кабан'],
+ ['にほん＿ すし','の',['を','で','に'],'японские суши (суши Японии)','Нихон но суси'],
+ ['すしや＿ いきます。','に',['を','で','の'],'Я иду в суши-бар.','Сусия ни икимас.'],
+ ['しちじ＿ おきます。','に',['で','を','の'],'Я встаю в 7 часов.','Ситидзи ни окимас.'],
+ ['みせ＿ すしを たべます。','で',['に','を','の'],'Я ем суши в кафе.','Мисэ дэ суси о табэмас.'],
+ ['はし＿ たべます。','で',['を','に','の'],'Я ем палочками.','Хаси дэ табэмас.'],
+ ['へや＿ ねます。','で',['を','の','と'],'Я сплю в номере.','Хэя дэ нэмас.'],
+ ['ホテル＿ まちます。','で',['を','の','と'],'Я жду в отеле.','Хотэру дэ матимас.'],
+ ['にほん＿ いきます。','へ',['を','で','の'],'Я еду в Японию.','Нихон э икимас.'],
+ ['すし＿ おちゃ','と',['を','で','が'],'суши и чай','Суси то отя'],
+ ['ともだち＿ いきます。','と',['を','の','で'],'Я иду с другом.','Томодати то икимас.'],
+ ['わたし＿ すしが すきです。','も',['は','を','で'],'Я тоже люблю суши.','Ватаси мо суси га суки дэс.'],
+ ['えき＿ ホテルまで','から',['で','を','の'],'от станции до отеля','Эки кара хотэру мадэ'],
+ ['えきから ホテル＿','まで',['で','を','の'],'от станции до отеля','Эки кара хотэру мадэ'],
+ ['これは すしです＿。','か',['を','が','の'],'Это суши?','Корэ ва суси дэс ка?']
+];
+const PREAD={'は':'ва','が':'га','を':'о','の':'но','に':'ни','で':'дэ','へ':'э','と':'то','も':'мо','から':'кара','まで':'мадэ','か':'ка'};
 const kItem=t=>({ch:t[0],ru:t[1],ro:`он: ${t[2]} (${t[3]})`+(t[4]?` · кун: ${t[4]} (${t[5]})`:''),
  ex:{w:t[6],k:t[7],r:t[8],m:t[9]},kanji:true});
 const isKanji=()=>S.settings.script==='kanji';
@@ -419,13 +448,13 @@ const TN=10;
 // kind: 'fill' — вставить пропущенное слово; 'say' — по русской транскрипции выбрать перевод
 const plainRu=t=>t.replace(/\s*\([^)]*\)\s*$/,'');
 function startTest(kind){
- kind=kind==='say'?'say':'fill';
+ kind=['say','part'].includes(kind)?kind:'fill';
  const take=(a,n)=>shuffle(a.slice()).slice(0,n);
- const picked=shuffle([...take(TEST.hira,3),...take(TEST.kata,3),...take(TEST.kanji,4)]);
+ const picked=kind==='part'?take(PARTS,10):shuffle([...take(TEST.hira,3),...take(TEST.kata,3),...take(TEST.kanji,4)]);
  const all=[...TEST.hira,...TEST.kata,...TEST.kanji];
  const qs=picked.map(q=>{
   const base={s:q[0],a:q[1],ru:q[3],rd:q[4],jp:q[0].replace('＿',q[1])};
-  if(kind==='fill')return {...base,ans:q[1],opts:shuffle([q[1],...q[2]])};
+  if(kind!=='say')return {...base,ans:q[1],opts:shuffle([q[1],...q[2]])};
   const ans=plainRu(q[3]),others=[];
   for(const x of shuffle(all.slice())){if(others.length>=3)break;const t=plainRu(x[3]);if(t!==ans&&!others.includes(t))others.push(t)}
   return {...base,ans,opts:shuffle([ans,...others])}});
@@ -435,15 +464,15 @@ const fillS=(q,html)=>q.s.replace('＿',html);
 function renderTest(){
  if(TS.i>=TS.qs.length)return renderResults();
  const q=TS.qs[TS.i],isSay=TS.kind==='say';TS.answered=false;
- const head=`<div class="tmeta"><span>${isSay?'Произношение':'Тест'} · фраза ${TS.i+1} из ${TS.qs.length}</span><span>верно: ${TS.ok}</span></div>
+ const head=`<div class="tmeta"><span>${isSay?'Произношение':TS.kind==='part'?'Частицы':'Тест'} · фраза ${TS.i+1} из ${TS.qs.length}</span><span>верно: ${TS.ok}</span></div>
   <div class="progress"><i style="width:${TS.i/TS.qs.length*100}%"></i></div>`;
  const body=isSay
   ?`<div class="rdq">${q.rd}</div>
     <div class="tr"><button class="link" type="button" id="tSay">🔊 послушать</button></div>`
   :`<div class="tq jp">${fillS(q,'<span class="blank">？</span>')}</div><div class="tr">${q.ru}</div>`;
  stage.innerHTML=head+body+`
-  <div class="opts">${q.opts.map((o,i)=>`<button class="opt ${isSay?'m':'jp t'}" data-i="${i}"><span class="k">${i+1}</span>${o}</button>`).join('')}</div>
-  <div class="fb" id="fb"><span class="ro">${isSay?'Прочитайте фразу вслух и выберите, что она значит.':'Какое слово пропущено?'} Можно нажимать клавиши 1–4.</span></div>`;
+  <div class="opts">${q.opts.map((o,i)=>`<button class="opt ${isSay?'m':'jp t'}" data-i="${i}"><span class="k">${i+1}</span>${o}${TS.kind==='part'?`<small>${PREAD[o]||''}</small>`:''}</button>`).join('')}</div>
+  <div class="fb" id="fb"><span class="ro">${isSay?'Прочитайте фразу вслух и выберите, что она значит.':TS.kind==='part'?'Какая частица пропущена? Подсказка — в переводе.':'Какое слово пропущено?'} Можно нажимать клавиши 1–4.</span></div>`;
  if(isSay)$('tSay').onclick=()=>say(q.jp);
  stage.querySelectorAll('.opt').forEach(b=>b.onclick=()=>testChoose(+b.dataset.i))}
 function testChoose(i){
@@ -562,7 +591,7 @@ gbox.addEventListener('change',()=>{
  if(!sel.length){syncSettingsUI();return}
  S.settings[gKey()]=sel;save();render()});
 document.querySelectorAll('input[name=sc]').forEach(i=>i.addEventListener('change',()=>{S.settings.script=i.value;last=null;lastWord=null;save();syncSettingsUI();render()}));
-$('startTest').onclick=()=>startTest('fill');$('startSay').onclick=()=>startTest('say');
+$('startTest').onclick=()=>startTest('fill');$('startSay').onclick=()=>startTest('say');$('startPart').onclick=()=>startTest('part');
 $('nav').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;TS=null;S.settings.mode=b.dataset.mode;save();render()});
 let resetArmed=null;
 $('reset').onclick=()=>{const b=$('reset');
