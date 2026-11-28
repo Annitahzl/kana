@@ -106,6 +106,11 @@ h3{margin:8px 0;font-size:15px;color:var(--muted);font-weight:600}
 @media (prefers-reduced-motion:reduce){.check.pop{animation:none}}
 .grid.g{margin-bottom:6px}
 .rowtools{width:100%;font-size:13px;color:var(--muted)}
+.memo{display:flex;gap:8px;flex-wrap:wrap;font-size:14px;margin-bottom:4px}
+.memo span{padding:3px 10px;border-radius:999px;border:1px solid var(--line)}
+.memo .my{background:var(--ok-soft);border-color:var(--ok)}
+.memo .mn{background:var(--bad-soft);border-color:var(--bad)}
+.memo .mp{margin-left:auto;color:var(--muted)}
 .link{background:none;border:none;color:var(--muted);text-decoration:underline;cursor:pointer;font:inherit;font-size:13px;padding:0}
 @media (max-width:420px){.big{font-size:104px}.word{font-size:48px}.btn{min-width:0;flex:1}}
 </style>
@@ -199,8 +204,30 @@ const WORDS=[
  ['でんしゃ','дэнся','электричка'],['しゃしん','сясин','фотография'],['きょう','кё:','сегодня'],['おちゃ','отя','чай'],
  ['ぎゅうにゅう','гю:ню:','молоко'],['じゅぎょう','дзюгё:','урок'],['りょこう','рёко:','путешествие'],
  ['びょういん','бё:ин','больница'],['しゅくだい','сюкудай','домашнее задание'],['ひゃく','хяку','сто'],
- ['りゅう','рю:','дракон'],['きゃく','кяку','гость'],['じしょ','дзисё','словарь'],['かいしゃ','кайся','компания, фирма']
+ ['りゅう','рю:','дракон'],['きゃく','кяку','гость'],['じしょ','дзисё','словарь'],['かいしゃ','кайся','компания, фирма'],
+ // еда, которую на вывесках часто пишут хираганой
+ ['うどん','удон','удон (толстая лапша)'],['そば','соба','соба (гречневая лапша)'],['おにぎり','онигири','онигири (рисовый треугольник)'],
+ ['てんぷら','тэмпура','темпура'],['やきとり','якитори','шашлычки из курицы'],['みそしる','мисосиру','мисо-суп'],['ぎゅうどん','гю:дон','рис с говядиной']
 ];
+// Настоящие слова на катакане: заимствования, которые видно в меню, на вывесках и в магазинах
+const KWORDS=[
+ // еда и меню
+ ['チョコレート','тёкорэ:то','шоколад'],['コーヒー','ко:хи:','кофе'],['ケーキ','кэ:ки','торт, пирожное'],['ビール','би:ру','пиво'],
+ ['ワイン','вайн','вино'],['ジュース','дзю:су','сок'],['ミルク','мируку','молоко'],['パン','пан','хлеб'],['ラーメン','ра:мэн','рамен (лапша в бульоне)'],
+ ['カレー','карэ:','карри'],['サラダ','сарада','салат'],['スープ','су:пу','суп'],['アイス','айсу','мороженое'],['ハンバーガー','хамба:га:','гамбургер'],
+ ['ステーキ','сутэ:ки','стейк'],['デザート','дэдза:то','десерт'],['メニュー','мэню:','меню'],['セット','сэтто','сет, комплексный обед'],
+ ['ランチ','ранти','ланч, обед'],['ドリンク','доринку','напитки'],['ココア','кокоа','какао'],['ピザ','пидза','пицца'],
+ // магазины и одежда
+ ['セール','сэ:ру','распродажа'],['レジ','рэдзи','касса'],['コンビニ','комбини','магазин у дома (24 часа)'],['スーパー','су:па:','супермаркет'],
+ ['デパート','дэпа:то','универмаг'],['シャツ','сяцу','рубашка'],['スカート','сука:то','юбка'],['ズボン','дзубон','брюки'],['コート','ко:то','пальто'],
+ ['バッグ','баггу','сумка'],['メンズ','мэндзу','мужской отдел'],['レディース','рэди:су','женский отдел'],['サイズ','сайдзу','размер'],
+ ['カード','ка:до','карта (банковская)'],['ポイント','поинто','баллы, бонусы'],['クーポン','ку:пон','купон'],
+ // город и отель
+ ['トイレ','тоирэ','туалет'],['ホテル','хотэру','отель'],['タクシー','такуси:','такси'],['バス','басу','автобус'],['エレベーター','эрэбэ:та:','лифт'],
+ ['エスカレーター','эсукарэ:та:','эскалатор'],['カフェ','кафэ','кафе'],['レストラン','рэсуторан','ресторан'],['タオル','таору','полотенце'],
+ ['オープン','о:пун','открыто'],['チケット','тикэтто','билет']
+];
+
 // Иероглифы: [знак, значение, он-чтение, он кириллицей, кун-чтение, кун кириллицей, пример, чтение примера, кириллицей, перевод]
 const KGROUPS=[
  {id:'num',label:'Числа и деньги',items:[
@@ -381,7 +408,7 @@ function choose(i){if(answered||!curOpts[i])return;answered=true;
 function renderCard(){
  const tp=targets(pool());if(!tp.length){cur=null;answered=true;renderNoHard();return}
  cur=pick(tp);answered=false;
- stage.innerHTML=`<div class="prompt"><div class="jp big">${cur.ch}</div></div>
+ stage.innerHTML=memoBar()+`<div class="prompt"><div class="jp big">${cur.ch}</div></div>
   <div class="hint" id="hint">${cur.kanji?'Вспомните значение и чтение, потом проверьте себя':'Скажите звук вслух, потом проверьте себя'}</div>
   <div class="act" id="act"><button class="btn primary" id="show">Показать<span class="k">пробел</span></button></div>`;
  $('show').onclick=reveal}
@@ -389,8 +416,11 @@ function wordPool(){
  if(isKanji())return pool().map(x=>[x.ex.w,`<span class="jp">${x.ex.k}</span> · ${x.ex.r}`,x.ex.m]);
  const allowed=new Set();
  GROUPS.filter(g=>S.settings.groups.includes(g.id)).forEach(g=>g.items.forEach(x=>[...x[0]].forEach(c=>allowed.add(c))));
+ const sc=S.settings.script,src=sc==='kata'?KWORDS:sc==='both'?WORDS.concat(KWORDS):WORDS;
+ const toHira=t=>t.replace(/[ァ-ヶ]/g,c=>String.fromCharCode(c.charCodeAt(0)-0x60));
+ const free=new Set(['ー','っ','ぁ','ぃ','ぅ','ぇ','ぉ']);
  const seen=new Set();
- return WORDS.filter(w=>{const k=w[0]+w[2];if(seen.has(k))return false;seen.add(k);return [...w[0]].every(c=>allowed.has(c))})}
+ return src.filter(w=>{const k=w[0]+w[2];if(seen.has(k))return false;seen.add(k);return [...toHira(w[0])].every(c=>allowed.has(c)||free.has(c))})}
 function renderWord(){
  let wp=wordPool();answered=false;
  if(hardMode()){const sc=S.settings.script;
@@ -398,9 +428,8 @@ function renderWord(){
   if(!wp.length){curWord=null;answered=true;renderNoHard();return}}
  if(!wp.length){stage.innerHTML='<div class="hint">Для выбранных рядов слов пока нет. Включите в настройках больше рядов.</div>';curWord=null;return}
  let w;do{w=wp[Math.floor(Math.random()*wp.length)]}while(wp.length>1&&w[0]===lastWord);lastWord=w[0];
- const sc=S.settings.script,kata=sc==='kata'||(sc==='both'&&Math.random()<.5);
- curWord={shown:kata?toKata(w[0]):w[0],ru:w[1],mean:w[2]};
- stage.innerHTML=`<div class="prompt"><div class="jp word">${curWord.shown}</div></div>
+ curWord={shown:w[0],ru:w[1],mean:w[2]};
+ stage.innerHTML=memoBar()+`<div class="prompt"><div class="jp word">${curWord.shown}</div></div>
   <div class="hint" id="hint">Прочитайте слово вслух, потом проверьте себя<br><small>Доступно слов: ${wp.length}</small></div>
   <div class="act" id="act"><button class="btn primary" id="show">Показать<span class="k">пробел</span></button></div>`;
  $('show').onclick=reveal}
@@ -410,10 +439,15 @@ function reveal(){if(answered)return;
    (cur.kanji?`<div class="ex"><span class="jp">${cur.ex.w}</span> — <span class="jp">${cur.ex.k}</span> · ${cur.ex.r} — ${cur.ex.m}</div>`:'')}
  else{if(!curWord)return;$('hint').innerHTML=`<div class="ru">${curWord.ru}</div><div class="mean">${curWord.mean}</div>`}
  answered=true;
- $('act').innerHTML=`<button class="btn bad" id="no">Не вспомнил<span class="k">1</span></button><button class="btn good" id="yes">Вспомнил<span class="k">2</span></button>`;
+ $('act').innerHTML=`<button class="btn bad" id="no">Не помню<span class="k">1</span></button><button class="btn good" id="yes">Помню<span class="k">2</span></button>`;
  $('no').onclick=()=>gradeCurrent(false);$('yes').onclick=()=>gradeCurrent(true)}
+// Счётчик «Помню / Не помню» за этот раз (карточки и слова)
+const memo={y:0,n:0};
+function memoBar(){const t=memo.y+memo.n,pc=t?Math.round(memo.y/t*100):0;
+ return `<div class="memo"><span class="my">Помню: <b>${memo.y}</b></span><span class="mn">Не помню: <b>${memo.n}</b></span>${t?`<span class="mp">${pc}%</span>`:''}</div>`}
 function gradeCurrent(ok){
  if(S.settings.mode==='card'?!cur:!curWord)return;
+ if(ok)memo.y++;else memo.n++;
  if(S.settings.mode==='card')grade(cur.ch,ok);
  else{if(ok){sess.r++}else{sess.w++;[...curWord.shown].forEach(c=>{const s=st(c);s.wt=Math.min(12,s.wt+2)});save()}renderStatus()}
  next()}
@@ -539,7 +573,7 @@ function renderListen(){
  const wp=listenWords();let q;
  if(wp.length>=4&&Math.random()<.35){
   let w;do{w=wp[Math.floor(Math.random()*wp.length)]}while(wp.length>1&&w[0]===lastWord);lastWord=w[0];
-  const sc=S.settings.script,kata=sc==='kata'||(sc==='both'&&Math.random()<.5),cv=s=>kata?toKata(s):s;
+  const cv=s=>s;
   const others=[];for(const x of shuffle(wp.slice())){if(others.length>=3)break;if(x[0]!==w[0]&&!others.some(o=>o[0]===x[0]))others.push(x)}
   const all=shuffle([w,...others]);
   q={kind:'word',say:w[0],ans:cv(w[0]),opts:all.map(x=>cv(x[0])),optSay:all.map(x=>x[0]),info:`${w[1]} — ${w[2]}`}
